@@ -4,11 +4,14 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include <sys/sysmacros.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 int main(int argc, char ** argv) {
 	const char *src_file = argv[1];
 	struct stat statbuf;
-	stat(src_file, &statbuf);
+	lstat(src_file, &statbuf);
 
 	switch (statbuf.st_mode & S_IFMT) {
 		case S_IFBLK:  printf("block device");            break;
@@ -46,10 +49,20 @@ int main(int argc, char ** argv) {
 	printf("%s\t", passwdbuf->pw_name);
 	struct group *groupbuf = getgrgid(statbuf.st_gid);
 	printf("%s\t", groupbuf->gr_name);
-	printf("%lu\t", statbuf.st_size);
+    if((statbuf.st_mode & S_IFMT) == S_IFBLK || (statbuf.st_mode & S_IFMT) == S_IFCHR) {
+		printf("%d, %d\t", major(statbuf.st_rdev), minor(statbuf.st_rdev));
+	} else {
+		printf("%lu\t", statbuf.st_size);
+	} 
 	struct tm *timebuf =  localtime(&statbuf.st_mtime);
 	printf("%d월 %d %d:%d\t", timebuf->tm_mon + 1, timebuf->tm_mday, timebuf->tm_hour, timebuf->tm_min);
-
-	printf("%s\n", src_file);
+	if((statbuf.st_mode & S_IFMT) == S_IFLNK) {
+		char buf[256];
+		ssize_t len = readlink(src_file, buf, sizeof buf);
+		buf[len] = '\0';
+		printf("%s -> %s\n", src_file, buf);
+	} else {
+		printf("%s\n", src_file);
+	}
 	return 0;
 }
