@@ -13,17 +13,17 @@ int main(int argc, char ** argv) {
 	struct stat statbuf;
 	lstat(src_file, &statbuf);
 
+	char perm[] = "----------";
 	switch (statbuf.st_mode & S_IFMT) {
-		case S_IFBLK:  printf("block device");            break;
-		case S_IFCHR:  printf("character device");        break;
-		case S_IFDIR:  printf("directory");               break;
-		case S_IFIFO:  printf("FIFO/pipe");               break;
-		case S_IFLNK:  printf("symlink");                 break;
-		case S_IFREG:  printf("regular file");            break;
-		case S_IFSOCK: printf("socket");                  break;
-		default:       printf("unknown?");                break;
+		case S_IFBLK:	perm[0] = 'b';	break;
+		case S_IFCHR:   perm[0] = 'c';	break;
+		case S_IFDIR:   perm[0] = 'd';	break;
+		case S_IFIFO:   perm[0] = 'p';	break;
+		case S_IFLNK:   perm[0] = 'l';	break;
+		case S_IFREG:   perm[0] = '-';	break;
+		case S_IFSOCK:  perm[0] = 's';	break;
+		default:						break;
 	}
-	printf("\t");
 
 	unsigned int arr_mask[9] = {
 		S_IRUSR, S_IWUSR, S_IXUSR, 
@@ -34,29 +34,30 @@ int main(int argc, char ** argv) {
 	
 	for(int i=0; i<num_of_mask; i++) {
 		if(statbuf.st_mode & arr_mask[i]) {
-			if(i % 3 == 0) printf("r");
-			else if(i % 3 == 1) printf("w");
-			else if(i % 3 == 2) printf("x");
+			if(i % 3 == 0) perm[i+1] = 'r';
+			else if(i % 3 == 1) perm[i+1] = 'w';
+			else if(i % 3 == 2) perm[i+1] = 'x';
 		} else {
-			printf("-");
+			perm[i+1] = '-';
 		}
 	}
-	printf("\t");
+	printf("%s ", perm);
 
-	printf("%u\t", statbuf.st_nlink);
+	printf("%u ", statbuf.st_nlink);
 	
 	struct passwd *passwdbuf = getpwuid(statbuf.st_uid);	
-	printf("%s\t", passwdbuf->pw_name);
+	printf("%s ", passwdbuf->pw_name);
 	struct group *groupbuf = getgrgid(statbuf.st_gid);
-	printf("%s\t", groupbuf->gr_name);
+	printf("%s ", groupbuf->gr_name);
     if((statbuf.st_mode & S_IFMT) == S_IFBLK || (statbuf.st_mode & S_IFMT) == S_IFCHR) {
-		printf("%d, %d\t", major(statbuf.st_rdev), minor(statbuf.st_rdev));
+		printf("%d, %d ", major(statbuf.st_rdev), minor(statbuf.st_rdev));
 	} else {
-		printf("%lu\t", statbuf.st_size);
+		printf("%lu ", statbuf.st_size);
 	} 
 	struct tm *timebuf =  localtime(&statbuf.st_mtime);
-	printf("%d월 %d %d:%d\t", timebuf->tm_mon + 1, timebuf->tm_mday, timebuf->tm_hour, timebuf->tm_min);
-	if((statbuf.st_mode & S_IFMT) == S_IFLNK) {
+	printf("%2d월 %2d %02d:%02d ", timebuf->tm_mon + 1, timebuf->tm_mday, timebuf->tm_hour, timebuf->tm_min);
+	
+	if(perm[0] == 'l') {
 		char buf[256];
 		ssize_t len = readlink(src_file, buf, sizeof buf);
 		buf[len] = '\0';
