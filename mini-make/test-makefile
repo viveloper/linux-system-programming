@@ -1,0 +1,5 @@
+mini-make : mini-make.c
+	gcc mini-make.c -o mini-make
+
+clean :
+	rm mini-make

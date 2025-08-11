@@ -1,0 +1,12 @@
+CC = gcc
+TARGET = aaa
+OBJS = main.o add.o
+
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $(TARGET)
+
+main.o: main.c
+	$(CC) -c main.c
+
+add.o: add.c
+	$(CC) -c add.c
