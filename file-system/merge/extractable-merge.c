@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
 		SRC_INFO src_info;
 		src_info.fsize = get_fsize(src);
 		strcpy(src_info.fname, src_path);
-		fprintf(stdout, "%s, %zu\n", src_info.fname, src_info.fsize);
 		fwrite(&src_info, sizeof(SRC_INFO), 1, dst);
 
 		unsigned char buffer[64 * 1024];
