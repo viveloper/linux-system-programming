@@ -30,13 +30,13 @@ int main(int argc, char **argv) {
 
 	unsigned char buffer;
 	size_t acc;
-	size_t read_count;
 	FILE *fp_src; 
 	SRC_INFO src_info;
 
-	while(read_count = fread(&src_info, sizeof(SRC_INFO), 1, fp)) {
+	while(fread(&src_info, sizeof(SRC_INFO), 1, fp)) {
 		acc = 0;
 		fp_src = fopen(src_info.fname, "wb");
+		size_t read_count;
 		while(read_count = fread(&buffer, 1, 1, fp)) {
 			fwrite(&buffer, 1, read_count, fp_src);
 			acc += read_count;
