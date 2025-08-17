@@ -35,6 +35,7 @@ int main(int argc, char ** argv) {
 			printf("-");
 		}
 	}
-	
+	printf("\n");
+
 	return 0;
 }
